@@ -27,6 +27,8 @@
 
 ;; (.. session (executeGraph "g.V()") (one) (as Vertex) (property "ice-id") (value))
 
+;; (.. session (executeGraph "g.V().has('sag','type','henvendelse')") (one) (as Vertex) (property "ice-id") (value))
+
 (defn get_g_V_count
   "g.V().count()"
   []
