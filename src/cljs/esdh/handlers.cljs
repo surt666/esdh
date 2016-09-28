@@ -10,10 +10,14 @@
 (re-frame/reg-event-db
  :sag-valgt
  (fn [db [_ sag]]
-   (println "HELLO " sag)
    (assoc db :sag sag)))
 
 (re-frame/reg-event-db
  :akt-valgt
  (fn [db [_ akt]]
    (assoc db :akt akt)))
+
+(re-frame/reg-event-db
+ :dokument-valgt
+ (fn [db [_ dok]]
+   (assoc db :dok dok)))

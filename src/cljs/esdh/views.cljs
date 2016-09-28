@@ -5,7 +5,6 @@
 
 (defn sag []
   (let [sag (re-frame/subscribe [:sag])]
-    (prn "SA " sag)
     (fn []
       [re-com/v-box
        :gap "10px"
@@ -22,14 +21,12 @@
                               [re-com/label :label (str "Oprettet: " (:oprettet @sag))]]]]])))
 
 (defn dokumenter []
-  (let [akt (re-frame/subscribe [:akt])
-        dokumenter (reaction (:dokumenter @akt))]
-    (prn "D " dokumenter)
+  (let [akt (re-frame/subscribe [:akt])]
     (fn []
       [re-com/v-box
        :gap "10px"
        :children [[re-com/box :child [:h4 "Dokumenter"]]
-                  [re-com/box :child [:table {:style {:height "160px" :display "block" :overflow-y "scroll"}} [:thead [:tr [:th "Dokument"] [:th "Titel"] [:th "Oprettet"] [:th "Rolle"]]] [:tbody (for [dok @dokumenter] [:tr [:td [re-com/hyperlink :label (:dokument-id dok)]] [:td (:titel dok)] [:td (:oprettet dok)] [:td (:rolle dok)]])]]]]])))
+                  [re-com/box :child [:table {:style {:height "160px" :display "block" :overflow-y "scroll"}} [:thead [:tr [:th "Dokument"] [:th "Titel"] [:th "Oprettet"] [:th "Rolle"]]] [:tbody (for [dok (:dokumenter @akt)] [:tr [:td [re-com/hyperlink :label (:dokument-id dok) :on-click #(re-frame/dispatch [:dokument-valgt dok])]] [:td (:titel dok)] [:td (:oprettet dok)] [:td (:rolle dok)]])]]]]])))
 
 (defn notat []
   (let [akt (re-frame/subscribe [:akt])
@@ -37,16 +34,16 @@
     (fn []
       [re-com/v-box
        :gap "10px"
-       :children [[re-com/box :child [:h4 "Notat"]]
-                  [re-com/box :child [:textarea {:defaultValue @notat}]]]])))
+       :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Notat"]] [re-com/box :child [re-com/hyperlink :label "edit" :on-click #(re-frame/dispatch [:edit "notat"])]]]]
+                  [re-com/box :child [:textarea {:id "notat" :rows 5 :cols 20 :value (:notat @akt)}]]]])))
 
 (defn dokument []
-  (let [name (re-frame/subscribe [:name])]
+  (let [dok (re-frame/subscribe [:dok])]
     (fn []
       [re-com/v-box
        :gap "10px"
-       :children [[re-com/box :child [:h4 "Dokument"]]
-                  [re-com/box :child [:textarea {:defaultValue "blolaolrao"}]]]])))
+       :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Dokument"]] [re-com/box :child [re-com/hyperlink :label "edit" :on-click #(re-frame/dispatch [:edit "doc"])]]]]
+                  [re-com/box :child [:textarea {:id "doc" :rows 5 :cols 20 :value (:rolle @dok)}]]]])))
 
 (defn sager []
   (let [sager (re-frame/subscribe [:sager])]
@@ -93,7 +90,7 @@
                              ]
                             [re-com/box
                              :child [notat]
-                             :height "100px"
+                             :height "150px"
                              ]
                             [re-com/box
                              :child [dokumenter]

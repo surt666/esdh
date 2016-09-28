@@ -3,11 +3,6 @@
     (:require [re-frame.core :as re-frame]))
 
 (re-frame/reg-sub
- :name
- (fn [db]
-   (:name db)))
-
-(re-frame/reg-sub
  :sag
  (fn [db]
    (:sag db)))
@@ -16,6 +11,11 @@
  :akt
  (fn [db]
    (:akt db)))
+
+(re-frame/reg-sub
+ :dok
+ (fn [db]
+   (:dok db)))
 
 (re-frame/reg-sub
  :sager
