@@ -5,6 +5,7 @@
    :sag nil
    :akt nil
    :dok nil
+   :edit nil
    :sager [{:sags-id "K-929292" :vur-ejd-id 9238923 :status "Afgjort" :frist "11/1/2014" :oprettet "23/12/2013" :sagsbehandler "w81919" :myndighed "SANST"
             :akter [{:notat "oehoteuoehu" :sagsbehandler "w19991" :oprettet "12/1/2015"
                      :dokumenter [{:dokument-id "821827" :titel "Henvendelse om bla" :oprettet "11/2/2014" :rolle  "Sagsbehandler"}

@@ -21,3 +21,8 @@
  :sager
  (fn [db]
    (:sager db)))
+
+(re-frame/reg-sub
+ :edit
+ (fn [db]
+   (:edit db)))

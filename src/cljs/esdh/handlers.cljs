@@ -21,3 +21,10 @@
  :dokument-valgt
  (fn [db [_ dok]]
    (assoc db :dok dok)))
+
+(re-frame/reg-event-db
+ :save
+ (fn [db [_ type val]]
+   (cond
+     (= type "notat") (assoc db :akt (assoc (:akt db) :notat val))
+     (= type "dok") (assoc db :sok val))))

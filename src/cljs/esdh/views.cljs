@@ -34,16 +34,20 @@
     (fn []
       [re-com/v-box
        :gap "10px"
-       :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Notat"]] [re-com/box :child [re-com/hyperlink :label "edit" :on-click #(re-frame/dispatch [:edit "notat"])]]]]
-                  [re-com/box :child [:textarea {:id "notat" :rows 5 :cols 20 :value (:notat @akt)}]]]])))
+       :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Notat"]] [re-com/box :child [re-com/hyperlink :label "edit" :on-click #(. js/CKEDITOR (replace "notat")) ;:on-click #(re-frame/dispatch [:edit "notat"])
+                                                                                                                            ]]]]
+                  [re-com/box :child [:textarea {:id "notat" :rows 5 :cols 20 :value (:notat @akt)}]]
+                  [re-com/button :label "Gem" :on-click #(re-frame/dispatch [:save @akt (aget (.getElementById js/document "notat") "value")])]]])))
 
 (defn dokument []
   (let [dok (re-frame/subscribe [:dok])]
     (fn []
       [re-com/v-box
        :gap "10px"
-       :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Dokument"]] [re-com/box :child [re-com/hyperlink :label "edit" :on-click #(re-frame/dispatch [:edit "doc"])]]]]
-                  [re-com/box :child [:textarea {:id "doc" :rows 5 :cols 20 :value (:rolle @dok)}]]]])))
+       :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Dokument"]] [re-com/box :child [re-com/hyperlink :label "edit" :on-click #(. js/CKEDITOR (replace "doc")); :on-click #(re-frame/dispatch [:edit "doc"])
+                                                                                                                               ]]]]
+                  [re-com/box :child [:textarea {:id "doc" :readonly "readonly" :rows 5 :cols 20 :value (:rolle @dok)}]]
+                  [re-com/button :label "Gem" :on-click #(re-frame/dispatch [:save @dok (aget (.getElementById js/document "doc") "value")])]]])))
 
 (defn sager []
   (let [sager (re-frame/subscribe [:sager])]
