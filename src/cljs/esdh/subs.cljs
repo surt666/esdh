@@ -18,11 +18,36 @@
    (:dok db)))
 
 (re-frame/reg-sub
+ :notat
+ (fn [db]
+   (:notat db)))
+
+(re-frame/reg-sub
  :sager
  (fn [db]
    (:sager db)))
 
 (re-frame/reg-sub
- :edit
+ :edit-dok
  (fn [db]
-   (:edit db)))
+   (:edit-dok db)))
+
+(re-frame/reg-sub
+ :upload-dok
+ (fn [db]
+   (:upload-dok db)))
+
+(re-frame/reg-sub
+ :akter
+ (fn [db]
+   (:akter db)))
+
+(re-frame/reg-sub
+ :add-sag
+ (fn [db]
+   (:add-sag db)))
+
+(re-frame/reg-sub
+ :add-akt
+ (fn [db]
+   (:add-akt db)))
