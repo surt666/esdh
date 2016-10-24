@@ -10,4 +10,5 @@
    :add-sag false
    :add-akt false
    :sager [{:ice-id [""]}]
-   :akter [{:ice-id [""]}]})
+   :akter [{:ice-id [""]}]
+   :dokumenter [{:ice-id [""]}]})

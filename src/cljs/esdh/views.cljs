@@ -21,13 +21,14 @@
                               [re-com/label :label (str "Oprettet: " (first (:oprettet @sag)))]]]]])))
 
 (defn dokumenter []
-  (let [akt (re-frame/subscribe [:akt])]
+  (let [dokumenter (re-frame/subscribe [:dokumenter])]
+    (prn "DOK" @dokumenter)
     (fn []
       [re-com/v-box
        :gap "10px"
        :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Dokumenter"]]
-                                                                      [re-com/box :child [re-com/hyperlink :label "tilføj" :on-click #(re-frame/dispatch [:upload-dok true])]]]]
-                  [re-com/box :child [:table {:style {:height "160px" :display "block" :overflow-y "scroll"}} [:thead [:tr [:th "Dokument"] [:th "Titel"] [:th "Oprettet"] [:th "Rolle"]]] [:tbody (for [dok (:dokumenter @akt)] [:tr [:td [re-com/hyperlink :label (:dokument-id dok) :on-click #(re-frame/dispatch [:dokument-valgt dok])]] [:td (:titel dok)] [:td (:oprettet dok)] [:td (:rolle dok)] [:td [re-com/hyperlink :label "edit" :on-click #(re-frame/dispatch [:edit-dok true])]]])]]]]])))
+                                                                      [re-com/box :child [re-com/hyperlink :label "Tilføj" :on-click #(re-frame/dispatch [:upload-dok true])]]]]
+                  [re-com/box :child [:table {:style {:height "160px" :display "block" :overflow-y "scroll"}} [:thead [:tr [:th "Dokument"] [:th "Titel"] [:th "Oprettet"]]] [:tbody (for [dok @dokumenter] [:tr [:td [re-com/hyperlink :label (str (first (:ice-id dok))) :on-click #(re-frame/dispatch [:dokument-valgt dok])]] [:td (str (first (:titel dok)))] [:td (str (first (:oprettet dok)))] [:td [re-com/hyperlink :label "edit" :on-click #(re-frame/dispatch [:edit-dok true])]]])]]]]])))
 
 (defn notat []
   (let [notat (re-frame/subscribe [:notat])]
@@ -74,7 +75,7 @@
       [re-com/v-box
        :gap "10px"
        :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Akter"]][re-com/box :child [re-com/hyperlink :label "Tilføj" :on-click #(re-frame/dispatch [:add-akt true])]]]]
-                  [re-com/box :child [:table {:style {:height "760px" :display "block" :overflow-y "scroll"} :cellPadding "5px" :cellSpacing "5px"} [:tbody {:id "akter" :style {:display (if (nil? @sag) "none" "block")}} (for [akt @akter] [:tr [:td [re-com/hyperlink :label (str (first (:ice-id akt)) " " (first (:sagsbehandler akt)) "  " (first (:oprettet akt))) :on-click #(re-frame/dispatch [:akt-valgt akt])]]])]]]]])))
+                  [re-com/box :child [:table {:style {:height "760px" :display "block" :overflow-y "scroll"} :cellPadding "5px" :cellSpacing "5px"} [:tbody {:id "akter" :style {:display (if (nil? @sag) "none" "block")}} (for [akt @akter] [:tr [:td [re-com/hyperlink :label (str (first (:sagsbehandler akt)) "  " (first (:oprettet akt))) :on-click #(re-frame/dispatch [:akt-valgt akt])]]])]]]]])))
 
 (defn edit-dok-modal [dok]
   [re-com/v-box
@@ -98,7 +99,10 @@
    :margin "20px"
    :children [[re-com/box :child [:h4 "Tilføj sag"]]
               [re-com/h-box :gap "10px" :children
-               [[re-com/box :child [:label "Myndighed"]] [re-com/box :child [:input {:type "text" :id "myndighed"}]] [re-com/box :child [:label "Type"]] [re-com/box :child [:input {:type "text" :id "type"}]]]]
+               [[re-com/box :child [:label "Myndighed"]]
+                [re-com/box :child [:input {:type "text" :id "myndighed"}]]
+                [re-com/box :child [:label "Type"]]
+                [re-com/box :child [:input {:type "text" :id "type"}]]]]
               [re-com/button :label "Gem" :on-click #(re-frame/dispatch [:add-sags-data (aget (.getElementById js/document "myndighed") "value") (aget (.getElementById js/document "type") "value")])]]])
 
 (defn add-akt-modal []
@@ -107,7 +111,10 @@
    :margin "20px"
    :children [[re-com/box :child [:h4 "Tilføj akt"]]
               [re-com/h-box :gap "10px" :children
-               [[re-com/box :child [:label "Myndighed"]] [re-com/box :child [:input {:type "text" :id "myndighed"}]] [re-com/box :child [:label "Type"]] [re-com/box :child [:input {:type "text" :id "type"}]]]]
+               [[re-com/box :child [:label "Myndighed"]]
+                [re-com/box :child [:input {:type "text" :id "myndighed"}]]
+                [re-com/box :child [:label "Type"]]
+                [re-com/box :child [:input {:type "text" :id "type"}]]]]
               [re-com/button :label "Gem" :on-click #(re-frame/dispatch [:add-akt-data (aget (.getElementById js/document "myndighed") "value") (aget (.getElementById js/document "type") "value")])]]])
 
 (defn main-panel []
@@ -115,7 +122,8 @@
         upload-dok (re-frame/subscribe [:upload-dok])
         dok (re-frame/subscribe [:dok])
         add-sag (re-frame/subscribe [:add-sag])
-        add-akt (re-frame/subscribe [:add-akt])]
+        add-akt (re-frame/subscribe [:add-akt])
+        ]
     (fn []
       [re-com/h-box
        :height "100%"

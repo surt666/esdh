@@ -18,6 +18,7 @@
  :akt-valgt
  (fn [db [_ akt]]
    (re-frame/dispatch [:find-notat (first (:ice-id akt))])
+   (re-frame/dispatch [:find-dokumenter (first (:ice-id akt))])
    (assoc db :akt akt)))
 
 (re-frame/reg-event-db
@@ -28,7 +29,6 @@
 (re-frame/reg-event-db
  :save-notat
  (fn [db [_ notat]]
-   (prn "NT" notat)
    (POST "http://localhost:3000/command"
          {:params {:command :gem-notat
                    :data {:notat notat
@@ -43,8 +43,7 @@
 (re-frame/reg-event-db
  :handle-upload
  (fn [db [_ resp]]
-   (prn "R" resp)
-   (assoc db :upload-dok false)))
+    (assoc db :upload-dok resp)))
 
 (re-frame/reg-event-db
  :upload
@@ -53,17 +52,17 @@
                          files (.-files input-element)
                          name (.-name input-element)
                          file (aget files 0)]
-                     (prn "F" file)
                      ;; (doseq [file-key (.keys js/Object files)]
                      ;;   (.append f-d name (aget files file-key)))
                      (.append f-d name file)
+                     (.append f-d "akt-id" (first (:ice-id (:akt db))))
                      f-d)]
      (POST "http://localhost:3000/upload"
            {:body form-data
             :response-format :json ;(raw-response-format)
             :keywords? true
             :timeout 100
-            :handler #(re-frame/dispatch [:handle-upload %1])}))
+            :handler #(re-frame/dispatch [:handle-upload false])}))
    db))
 
 (re-frame/reg-event-db
@@ -117,7 +116,6 @@
 (re-frame/reg-event-db
  :process-notat
  (fn [db [_ res]]
-   (prn "N" res)
    (-> db
        (assoc :notat res))))
 
@@ -131,11 +129,26 @@
      :response-format (json-response-format {:keywords? true})})
    db))
 
+(re-frame/reg-event-db
+ :process-dokumenter
+ (fn [db [_ res]]
+    (-> db
+       (assoc :dokumenter res))))
+
+(re-frame/reg-event-db
+ :find-dokumenter
+ (fn [db [_ akt-id]]
+   (GET
+    "http://localhost:3000/dokumenter"
+    {:handler #(re-frame/dispatch [:process-dokumenter %1])
+     :params {:akt-id akt-id}
+     :response-format (json-response-format {:keywords? true})})
+   db))
+
 
 (re-frame/reg-event-db
  :process-notat
  (fn [db [_ res]]
-   (prn "N" res)
    (-> db
        (assoc :notat res))))
 
@@ -153,13 +166,21 @@
 
 (re-frame/reg-event-db
  :add-akt-data
- (fn [db [_ sags-id myndighed type]]
-   (prn "NT" myndighed)
+ (fn [db [_  myndighed type]]
+   (prn "NT" myndighed (first (:ice-id (:sag db))))
    (POST "http://localhost:3000/command"
-         {:params {:command :opret-sag
+         {:params {:command :opret-akt
                    :data {:myndighed myndighed
                           :type type
-                          :sags-id sags-id
+                          :sags-id (first (:ice-id (:sag db)))
                           :sagsbehandler "w19807"}}})
-   (re-frame/dispatch [:find-akter sags-id])
+   (re-frame/dispatch [:find-akter (first (:ice-id (:sag db)))])
    (assoc db :add-akt false)))
+
+(re-frame/reg-event-db
+ :preview
+ (fn [db [_  dokument]]
+     (POST "http://localhost:3000/command"
+         {:params {:command :preview
+                   :data {:dokument dokument}}})
+ db))

@@ -23,6 +23,11 @@
    (:notat db)))
 
 (re-frame/reg-sub
+ :dokumenter
+ (fn [db]
+   (:dokumenter db)))
+
+(re-frame/reg-sub
  :sager
  (fn [db]
    (:sager db)))
