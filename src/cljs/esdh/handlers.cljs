@@ -1,7 +1,7 @@
 (ns esdh.handlers
     (:require [re-frame.core :as re-frame]
               [esdh.db :as db]
-              [ajax.core :refer [GET POST json-response-format]]))
+              [ajax.core :refer [GET POST json-response-format raw-response-format]]))
 
 (re-frame/reg-event-db
  :initialize-db
@@ -29,10 +29,12 @@
 (re-frame/reg-event-db
  :save-notat
  (fn [db [_ notat]]
-   (POST "http://localhost:3000/command"
-         {:params {:command :gem-notat
-                   :data {:notat notat
-                          :akt-id (first (:ice-id (:akt db)))}}})
+   (let [val (POST "http://localhost:3000/command"
+                 {:params {:command :gem-notat
+                           :data {:notat notat
+                                  :akt-id (first (:ice-id (:akt db)))}}
+                  :response-format :edn})]
+     (prn "SAVE" val))
    (assoc db :notat val)))
 
 (re-frame/reg-event-db
@@ -40,10 +42,14 @@
  (fn [db [_ edit?]]
    (assoc db :edit-dok edit?)))
 
+;; (re-frame/reg-event-db
+;;  :handle-upload
+;;  (fn [db [_ resp]]
+;;     (assoc db :upload-dok resp)))
 (re-frame/reg-event-db
- :handle-upload
- (fn [db [_ resp]]
-    (assoc db :upload-dok resp)))
+ :upload-dok
+ (fn [db [_ upload?]]
+   (assoc db :upload-dok upload?)))
 
 (re-frame/reg-event-db
  :upload
@@ -59,16 +65,10 @@
                      f-d)]
      (POST "http://localhost:3000/upload"
            {:body form-data
-            :response-format :json ;(raw-response-format)
+            :response-format (raw-response-format)
             :keywords? true
             :timeout 100
-            :handler #(re-frame/dispatch [:handle-upload false])}))
-   db))
-
-(re-frame/reg-event-db
- :upload-dok
- (fn [db [_ upload?]]
-   (assoc db :upload-dok upload?)))
+            :handler #(re-frame/dispatch [:upload-dok false])}))))
 
 (re-frame/reg-event-db
  :add-sag
@@ -83,7 +83,6 @@
 (re-frame/reg-event-db
  :process-sager
  (fn [db [_ res]]
-   (prn "S" res)
    (-> db
        (assoc :sager res))))
 
@@ -145,13 +144,6 @@
      :response-format (json-response-format {:keywords? true})})
    db))
 
-
-(re-frame/reg-event-db
- :process-notat
- (fn [db [_ res]]
-   (-> db
-       (assoc :notat res))))
-
 (re-frame/reg-event-db
  :add-sags-data
  (fn [db [_ myndighed type]]
@@ -180,7 +172,8 @@
 (re-frame/reg-event-db
  :preview
  (fn [db [_  dokument]]
-     (POST "http://localhost:3000/command"
-         {:params {:command :preview
-                   :data {:dokument dokument}}})
- db))
+   (let [x (POST "http://localhost:3000/preview"
+                {:params {:data dokument}
+                 :response-format (raw-response-format)})]
+     (prn "PRE" x))
+   db))

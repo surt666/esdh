@@ -37,7 +37,7 @@
        :gap "10px"
        :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Notat"]]
                                                                       [re-com/box :child [re-com/hyperlink :label "edit" :on-click #(. js/CKEDITOR (replace "notat"))]]
-                                                                      [re-com/box :child [re-com/hyperlink :label "preview" :on-click #(re-frame/dispatch [:preview "notat"])]]]]
+                                                                      [re-com/box :child [re-com/hyperlink :label "preview" :on-click #(re-frame/dispatch [:preview (:dokument @notat)])]]]]
                   [re-com/box :child [:textarea {:id "notat" :rows 5 :cols 20 :value (:dokument @notat)}]]
                   [re-com/button :label "Gem" :on-click #(re-frame/dispatch [:save-notat (let [instances  (aget js/CKEDITOR "instances")
                                                                                                instance (aget instances "notat")]
