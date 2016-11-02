@@ -5,6 +5,7 @@
    :akt nil
    :dok nil
    :notat ""
+   :loading? false
    :edit-dok false
    :upload-dok false
    :add-sag false

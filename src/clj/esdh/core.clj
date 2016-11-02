@@ -1,74 +1,205 @@
 (ns esdh.core
-  (:require [clojurewerkz.ogre.core :as q])
-  (:import [org.apache.tinkerpop.gremlin.tinkergraph.structure TinkerGraph]
-           [com.datastax.driver.dse DseCluster DseSession]
-           [com.datastax.driver.dse.graph GraphOptions]
-           [com.datastax.driver.dse.graph GraphStatement  SimpleGraphStatement]))
+  (:require [yada.yada :refer [listener handler resource as-resource]]
+            [yada.multipart :refer [find-part part-string part-bytes part-content-type]]
+            [yada.swagger :refer [swaggered swagger-spec swagger-spec-resource]]
+            [bidi.bidi :refer [tag]]
+            [clojure.pprint :refer [pprint]]
+            [schema.core :as s]
+            [esdh.graphdb :as g]
+            [clj-time.core :as t]
+            [clj-time.local :as l]
+            [clj-uuid :as uuid])
+  (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
+           [java.util Base64]
+           [com.itextpdf.text Document DocumentException]
+           [com.itextpdf.text.pdf PdfWriter]
+           [com.itextpdf.tool.xml XMLWorkerHelper]))
 
-(def conf {
-           "vendor" "dse"
-           "hostUri" "ws://localhost:8182/gremlin"  ;; URL of the gremlin server to connect to
-           "gremlin.graph" "org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph"
-           "address" "localhost/127.0.0.1:8182"
-           "graphName" "esdh"    ;; name of the graph to connect to
-           "create" false ;; whether to create graphName if it does not exist
-           })
+(def sager
+  (resource
+   {:produces {:media-type #{"text/plain"
+                             "text/html"
+                             "application/edn;q=0.9"
+                             "application/json;q=0.8"
+                             "application/transit+json;q=0.7"}
+               :charset "UTF-8"}
+    :access-control {:allow-origin "*"}
+    :methods
 
-;;{address=localhost/127.0.0.1:8182, hostUri=ws://localhost:8182/gremlin}
+    {:get
+     {:parameters {:query {(s/optional-key :id) String}}
+      :response
+      (fn [ctx]
+        (let [id (get-in ctx [:parameters :query :id])]
+          (g/find-sager)))}}}))
 
-(def graph (q/open-graph conf))
+(def akter
+  (resource
+   {:produces {:media-type #{"text/plain"
+                             "text/html"
+                             "application/edn;q=0.9"
+                             "application/json;q=0.8"
+                             "application/transit+json;q=0.7"}
+               :charset "UTF-8"}
+    :access-control {:allow-origin "*"}
+    :methods
+    {:get
+     {:parameters {:query {:sags-id String}}
+      :response
+      (fn [ctx]
+        (let [sags-id (get-in ctx [:parameters :query :sags-id])]
+          (g/find-akter sags-id)))}}}))
 
-(def g (q/traversal graph))
+(defn decode [to-decode]
+  (String. (.decode (Base64/getDecoder) to-decode)))
 
-(def cluster (.. DseCluster (builder) (addContactPoint "127.0.0.1") (withGraphOptions (. (GraphOptions.) (setGraphName "esdh"))) (build)))
+(def notat
+  (resource
+   {:produces {:media-type #{"application/edn;q=0.9"
+                             "application/json;q=0.8"
+                             "application/transit+json;q=0.7"}
+               :charset "UTF-8"}
+    :access-control {:allow-origin "*"}
+    :methods
+    {:get
+     {:parameters {:query {:akt-id String}}
+      :response
+      (fn [ctx]
+        (let [akt-id (get-in ctx [:parameters :query :akt-id])
+              n (g/find-notat akt-id)
+              n-as-s "blaaa"; (apply str (map char (:dokument n)))
+              ]
+          (prn "NS" n-as-s (type (:dokument n)) (:dokument n))
+          (assoc n :dokument n-as-s)))}}}))
 
-(def session (.connect cluster))
+(def dokumenter
+  (resource
+   {:produces {:media-type #{"application/edn;q=0.9"
+                             "application/json;q=0.8"
+                             "application/transit+json;q=0.7"}
+               :charset "UTF-8"}
+    :access-control {:allow-origin "*"}
+    :methods
+    {:get
+     {:parameters {:query {:akt-id String}}
+      :response
+      (fn [ctx]
+        (let [akt-id (get-in ctx [:parameters :query :akt-id])
+              d (g/find-dokumenter akt-id)]
+          d))}}}))
 
-;;(.. session (executeGraph "g.V()") (one))
+(def open-dok
+  (resource
+   {:access-control {:allow-origin "*"}
+    :produces {:media-type #{"application/pdf" "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
+               :charset "UTF-8"}
+    :methods
+    {:get
+     {:parameters {:query {:dok-id String}}
+      :response
+      (fn [ctx]
+        (let [dok-id (get-in ctx [:parameters :query :dok-id])
+              d (g/find-dokument dok-id)]
+          (decode (first (:dokument d)))))}}}))
 
-;; (.. session (executeGraph "g.V()") (one) (as Vertex) (property "ice-id") (value))
+(defn opret-sag [data]
+  (let [res (g/opret-sag (uuid/v1) (:myndighed data) (:type data) (str (l/local-now)) (:sagsbehandler data))]
+    (prn "RES2" res)))
 
-;; (.. session (executeGraph "g.V().has('sag','type','henvendelse')") (one) (as Vertex) (property "ice-id") (value))
+(defn opret-akt [data]
+  (prn "JUHU" data)
+  (let [res (g/opret-akt (:sags-id data) (uuid/v1) (:myndighed data) (:type data) (str (l/local-now)) (:sagsbehandler data))]
+    (prn "RES3" res)))
 
-;; g.V().has('ice-id','123').outE('har_bfe').has('tx', lt('2016-02-01')).has('fra',gt('2012-01-01')).has('til',lt('2014-01-01'))
+(defn opret-notat [data]
+  (let [res (g/opret-notat (uuid/v1) false (:notat data) (str (l/local-now)) (:akt-id data))]
+    (prn "RES" res)))
 
-;; (def s (SimpleGraphStatement. "v1 = g.addV(label,'notat','ice-id','345221','dokument',d1)"))
-;; #'esdh.core/s
-;; esdh.core> (. s (set "d1" (.getBytes "82828")))
-;; #object[com.datastax.driver.dse.graph.SimpleGraphStatement 0x53fd1471 "com.datastax.driver.dse.graph.SimpleGraphStatement@53fd1471"]
-;; esdh.core> s
-;; #object[com.datastax.driver.dse.graph.SimpleGraphStatement 0x53fd1471 "com.datastax.driver.dse.graph.SimpleGraphStatement@53fd1471"]
-;; esdh.core> (.. session (executeGraph s))
-;; #object[com.datastax.driver.dse.graph.GraphResultSet 0x4ad703be "com.datastax.driver.dse.graph.GraphResultSet@4ad703be"]
+(def preview
+  (resource
+   {:consumes {:media-type #{"application/edn;q=0.9"
+                             "application/json;q=0.8"
+                             "application/transit+json;q=0.7"}}
+    :produces {:media-type #{"application/pdf"}
+               :charset "UTF-8"}
+    :access-control {:allow-origin "*"
+                     :allow-headers ["Content-Type"]
+                     :allow-methods #{:post}}
+    :methods {:post
+              {:response (fn [ctx]
+                           (let [body (:body ctx)
+                                 dok (:data body)
+                                 d (Document.)
+                                 out (ByteArrayOutputStream.)
+                                 writer (PdfWriter/getInstance d out)]
+                             (prn "DATA" dok)
+                             (.open d)
+                             (.. (XMLWorkerHelper/getInstance) (parseXHtml writer d (ByteArrayInputStream. (.getBytes dok))))
+                             (.close d)
+                             (.toByteArray out) ))}}}))
 
-(defn opret-notat [ice-id endelig? dokument oprettet]
-  (let [s (SimpleGraphStatement. "g.addV(label,'notat','ice-id',i,'dokument',d,'endelig',e,'oprettet',o)")]
-    (doto s (.set "e" endelig?) (.set "d" (.getBytes dokument)) (.set "o" oprettet) (.set "i" ice-id))
-    (.. session (executeGraph s))))
+(def command
+  (resource
+   {:consumes {:media-type #{"application/edn;q=0.9"
+                             "application/json;q=0.8"
+                             "application/transit+json;q=0.7"}}
+    :produces {:media-type #{"application/pdf"
+                             "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                             "text/plain"
+                             "text/html"
+                             "application/edn;q=0.9"
+                             "application/json;q=0.8"
+                             "application/transit+json;q=0.7"}
+               :charset "UTF-8"}
+    :access-control {:allow-origin "*"
+                     :allow-headers ["Content-Type"]
+                     :allow-methods #{:post}}
+    :methods {:post
+              {:response (fn [ctx]
+                           (let [body (:body ctx)
+                                 command (:command body)
+                                 data (:data body)]
+                           ;  (prn "C" command data)
+                             (cond
+                               (= command :preview) (preview data)
+                               (= command :opret-sag) (opret-sag data)
+                               (= command :opret-akt) (opret-akt data)
+                               (= command :gem-notat) (opret-notat data))))}}}))
 
-(defn opret-dokument [ice-id endelig? dokument oprettet mime-type titel]
-  "dokument er bytearray"
-  (let [s (SimpleGraphStatement. "g.addV(label,'dokument','ice-id',i,'dokument',d,'endelig',e,'oprettet',o,'titel',t,'mime-type',m)")]
-    (doto s (.set "e" endelig?) (.set "d" dokument) (.set "o" oprettet) (.set "i" ice-id) (.set "t" titel) (.set "m" mime-type))
-    (.. session (executeGraph s))))
+(def upload
+  (resource
+   {:consumes [{:media-type #{"multipart/form-data"}}]
+    :access-control {:allow-origin "*"
+                     :allow-headers ["Content-Type"]
+                     :allow-methods #{:post}}
+    :produces {:media-type #{"text/plain" "text/html" "application/edn;q=0.9" "application/json;q=0.8" "application/transit+json;q=0.7"}
+               :charset "UTF-8"}
+    :methods {:post
+              {:response (fn [ctx]
+                           (let [body (:body ctx)
+                                 part (find-part ctx "akt-id")
+                                 akt-id (part-string part)
+                                 part2 (find-part ctx "files")
+                                 bytes (part-bytes part2)
+                                 content-type (:name (part-content-type part2))
+                                 file-id (uuid/v1)
+                                 _ (prn "U" content-type akt-id (String. bytes 0 50) file-id)
+                                 filename (get (:params (:content-disposition (get (:body ctx) "files"))) "filename")]
+                             (let [res (g/opret-dokument file-id akt-id true bytes (str (l/local-now)) content-type filename)]
+                               (assoc (:response ctx) :file-id file-id))))}}}))
 
-(defn opret-sag [ice-id myndighed type oprettet sagsbehandler status]
-  "dokument er bytearray"
-  (let [s (SimpleGraphStatement. "g.addV(label,'sag','ice-id',i,'myndighed',m,'type',t,'oprettet',o,'sagsbehandler',s)")]
-    (doto s (.set "m" myndighed) (.set "t" type) (.set "o" oprettet) (.set "i" ice-id) (.set "s" sagsbehandler))
-    (.. session (executeGraph s))))
+(defn routes []
+  ["/"
+   [["preview" preview]
+    ["sager" sager]
+    ["akter" akter]
+    ["notat" notat]
+    ["dokument" open-dok]
+    ["dokumenter" dokumenter]
+    ["command" command]
+    ["upload" upload]]])
 
-(defn opret-akt [sags-id ice-id myndighed type oprettet sagsbehandler status]
-  "dokument er bytearray"
-  (let [s (SimpleGraphStatement. (str "v1 = g.addV(label,'akt','ice-id',i,'myndighed',m,'type',t,'oprettet',o,'sagsbehandler',s).next()\n"
-                                      "v2 = g.V().has(label,'sag').has('ice-id',si).next()\n"
-                                      "v1.addEdge('tilhører',v2)"))]
-    (doto s (.set "m" myndighed) (.set "t" type) (.set "o" oprettet) (.set "i" ice-id) (.set "s" sagsbehandler) (.set "si" sags-id))
-    (.. session (executeGraph s))))
-
-(defn get_g_V_count
-  "g.V().count()"
-  []
-  (q/traverse g
-              (q/V)
-              (q/count)))
+(def svr
+  (listener
+   (routes)
+   {:port 3000}))

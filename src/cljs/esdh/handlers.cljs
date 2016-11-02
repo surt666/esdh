@@ -49,11 +49,30 @@
 (re-frame/reg-event-db
  :upload-dok
  (fn [db [_ upload?]]
+   (prn "UP1")
    (assoc db :upload-dok upload?)))
+
+(re-frame/reg-event-db
+ :update-dok
+ (fn [db [_ e]]
+   (prn "UDD" e)
+   (let [akt (:akt db)]
+        (re-frame/dispatch [:find-dokumenter (first (:ice-id akt))])
+        (assoc db :upload-dok false :loading? false))))
+
+(re-frame/reg-event-db
+ :error
+ (fn [db [_ res]]
+   (.log js/console (str "something bad happened: " res))
+   (assoc db :upload-dok false :loading? false)))
+
+;; (defn error-handler [{:keys [status status-text]}]
+;;   (.log js/console (str "something bad happened: " status " " status-text)))
 
 (re-frame/reg-event-db
  :upload
  (fn [db [_ input-element]]
+   (prn "UP2")
    (let [form-data (let [f-d (js/FormData.)
                          files (.-files input-element)
                          name (.-name input-element)
@@ -65,10 +84,9 @@
                      f-d)]
      (POST "http://localhost:3000/upload"
            {:body form-data
-            :response-format (raw-response-format)
-            :keywords? true
-            :timeout 100
-            :handler #(re-frame/dispatch [:upload-dok false])}))))
+            :handler #(re-frame/dispatch [:update-dok %1])
+            :error-handler #(re-frame/dispatch [:error %1])})
+     (assoc db :loading? true))))
 
 (re-frame/reg-event-db
  :add-sag
@@ -176,4 +194,10 @@
                 {:params {:data dokument}
                  :response-format (raw-response-format)})]
      (prn "PRE" x))
+   db))
+
+(re-frame/reg-event-db
+ :search
+ (fn [db [_ criteria type]]
+   (prn "SEARCH" criteria type)
    db))

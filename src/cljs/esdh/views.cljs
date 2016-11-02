@@ -22,7 +22,6 @@
 
 (defn dokumenter []
   (let [dokumenter (re-frame/subscribe [:dokumenter])]
-    (prn "DOK" @dokumenter)
     (fn []
       [re-com/v-box
        :gap "10px"
@@ -55,13 +54,15 @@
                   [re-com/button :label "Gem" :on-click #(re-frame/dispatch [:save @dok (aget (.getElementById js/document "doc") "value")])]]])))
 
 (defn sager []
-  (let [sager (re-frame/subscribe [:sager])]
+  (let [sager (re-frame/subscribe [:sager])
+        criteria-sag ""]
     (fn []
       [re-com/v-box
        :gap "10px"
        :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Sager"]]
                                                                       [re-com/box :child [re-com/hyperlink :label "Hent" :on-click #(re-frame/dispatch [:find-sager])]]
                                                                       [re-com/box :child [re-com/hyperlink :label "Tilføj" :on-click #(re-frame/dispatch [:add-sag true])]]]]
+                  [re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [re-com/input-text :model criteria-sag :on-change #(re-frame/dispatch [:search % :sag]) :status nil :change-on-blur? true :placeholder "Søg"]]]]
                   [re-com/box :child [:table {:style {:height "760px" :display "block" :overflow-y "scroll"}}
                                       (vec (cons :tbody
                                                  (for [sag @sager]
@@ -70,11 +71,13 @@
 
 (defn akter []
   (let [sag (re-frame/subscribe [:sag])
-        akter (re-frame/subscribe [:akter])]
+        akter (re-frame/subscribe [:akter])
+        criteria-akt ""]
     (fn []
       [re-com/v-box
        :gap "10px"
        :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Akter"]][re-com/box :child [re-com/hyperlink :label "Tilføj" :on-click #(re-frame/dispatch [:add-akt true])]]]]
+                  [re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [re-com/input-text :model criteria-akt :on-change #(re-frame/dispatch [:search % :akt]) :status nil :change-on-blur? true :placeholder "Søg"]]]]
                   [re-com/box :child [:table {:style {:height "760px" :display "block" :overflow-y "scroll"} :cellPadding "5px" :cellSpacing "5px"} [:tbody {:id "akter" :style {:display (if (nil? @sag) "none" "block")}} (for [akt @akter] [:tr [:td [re-com/hyperlink :label (str (first (:sagsbehandler akt)) "  " (first (:oprettet akt))) :on-click #(re-frame/dispatch [:akt-valgt akt])]]])]]]]])))
 
 (defn edit-dok-modal [dok]
