@@ -91,7 +91,7 @@
 (def open-dok
   (resource
    {:access-control {:allow-origin "*"}
-    :produces {:media-type #{"application/pdf" "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
+    :produces {:media-type #{"application/pdf" "application/vnd.openxmlformats-officedocument.wordprocessingml.document" "text/html"}
                :charset "UTF-8"}
     :methods
     {:get
