@@ -20,6 +20,26 @@
                               [re-com/label :label (str "Sagsbehandler: " (first (:sagsbehandler @sag)))]
                               [re-com/label :label (str "Oprettet: " (first (:oprettet @sag)))]]]]])))
 
+(defn akt []
+  (let [akt (re-frame/subscribe [:akt])]
+    (fn []
+      [re-com/v-box
+       :gap "10px"
+       :children [[re-com/h-box
+                   :gap "10px"
+                   :align :center
+                   :children [[re-com/box :child [:h4 "Akt"]]
+                              [re-com/box :child [re-com/hyperlink :label "Send akt" :on-click #(re-frame/dispatch [:send-akt-til-part])]]]]
+                  [re-com/h-box
+                   :gap "10px"
+                   :children [[re-com/label :label (str "Id: " (first (:ice-id @akt)))]
+                              [re-com/label :label (str "Frist: " (first (:frist @akt)))]]]
+                  [re-com/h-box
+                   :gap "10px"
+                   :children [[re-com/label :label (str "Myndighed: " (first (:myndighed @akt)))]
+                              [re-com/label :label (str "Sagsbehandler: " (first (:sagsbehandler @akt)))]
+                              [re-com/label :label (str "Oprettet: " (first (:oprettet @akt)))]]]]])))
+
 (defn dokumenter []
   (let [dokumenter (re-frame/subscribe [:dokumenter])]
     (fn []
@@ -149,6 +169,10 @@
                    :gap "10px"
                    :children [[re-com/box
                                :child [sag]
+                               :height "100px"
+                               ]
+                              [re-com/box
+                               :child [akt]
                                :height "100px"
                                ]
                               [re-com/box
