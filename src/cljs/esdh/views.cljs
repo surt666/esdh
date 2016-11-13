@@ -1,7 +1,8 @@
 (ns esdh.views
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :as re-frame]
-            [re-com.core :as re-com]))
+            [re-com.core :as re-com]
+            [reagent.core :as reagent]))
 
 (defn sag []
   (let [sag (re-frame/subscribe [:sag])]
@@ -29,7 +30,7 @@
                    :gap "10px"
                    :align :center
                    :children [[re-com/box :child [:h4 "Akt"]]
-                              [re-com/box :child [re-com/hyperlink :label "Send akt" :on-click #(re-frame/dispatch [:send-akt-til-part])]]]]
+                              [re-com/box :child [re-com/hyperlink :label "Send akt" :on-click #(re-frame/dispatch [:send-akt true])]]]]
                   [re-com/h-box
                    :gap "10px"
                    :children [[re-com/label :label (str "Id: " (first (:ice-id @akt)))]
@@ -140,13 +141,26 @@
                 [re-com/box :child [:input {:type "text" :id "type"}]]]]
               [re-com/button :label "Gem" :on-click #(re-frame/dispatch [:add-akt-data (aget (.getElementById js/document "myndighed") "value") (aget (.getElementById js/document "type") "value")])]]])
 
+(defn send-akt-modal []
+  (let [akt (re-frame/subscribe [:akt])
+        parter (re-frame/subscribe [:parter])
+        selections (reagent/atom #{})]
+    [re-com/v-box
+           :gap "10px"
+           :margin "20px"
+           :children [[re-com/box :child [:h4 "Send akt"]]
+                      [re-com/h-box :gap "10px" :children
+                       [[re-com/box :child [:label "Parter"]]
+                        [re-com/selection-list :choices @parter :model selections :on-change #(reset! selections %) :label-fn :navn  :multi-select? true :requiered? true]]]
+                      [re-com/button :label "Gem" :on-click #(re-frame/dispatch [:send-akt-data @selections])]]]))
+
 (defn main-panel []
   (let [edit-dok (re-frame/subscribe [:edit-dok])
         upload-dok (re-frame/subscribe [:upload-dok])
         dok (re-frame/subscribe [:dok])
         add-sag (re-frame/subscribe [:add-sag])
         add-akt (re-frame/subscribe [:add-akt])
-        ]
+        send-akt (re-frame/subscribe [:send-akt])]
     (fn []
       [re-com/h-box
        :height "100%"
@@ -202,4 +216,8 @@
                   (when @add-akt
                     [re-com/modal-panel
                      :backdrop-on-click #(re-frame/dispatch [:add-akt false])
-                     :child (add-akt-modal)])]])))
+                     :child (add-akt-modal)])
+                  (when @send-akt
+                    [re-com/modal-panel
+                     :backdrop-on-click #(re-frame/dispatch [:send-akt false])
+                     :child (send-akt-modal)])]])))

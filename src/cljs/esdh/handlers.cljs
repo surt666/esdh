@@ -201,3 +201,9 @@
  (fn [db [_ criteria type]]
    (prn "SEARCH" criteria type)
    db))
+
+(re-frame/reg-event-db
+ :send-akt
+ (fn [db [_ send?]]
+   (let [parter [{:id 1 :navn "Hans Jansen" :type :ejer} {:id 2 :navn "Georg G" :type :rep}]]
+     (assoc db :parter parter :send-akt send?))))

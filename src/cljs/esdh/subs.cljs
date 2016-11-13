@@ -56,3 +56,13 @@
  :add-akt
  (fn [db]
    (:add-akt db)))
+
+(re-frame/reg-sub
+ :send-akt
+ (fn [db]
+   (:send-akt db)))
+
+(re-frame/reg-sub
+ :parter
+ (fn [db]
+   (:parter db)))
