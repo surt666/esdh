@@ -151,8 +151,9 @@
            :children [[re-com/box :child [:h4 "Send akt"]]
                       [re-com/h-box :gap "10px" :children
                        [[re-com/box :child [:label "Parter"]]
-                        [re-com/selection-list :choices @parter :model selections :on-change #(reset! selections %) :label-fn :navn  :multi-select? true :requiered? true]]]
-                      [re-com/button :label "Gem" :on-click #(re-frame/dispatch [:send-akt-data @selections])]]]))
+                        [re-com/selection-list :choices @parter :model selections :on-change #(reset! selections %) :label-fn :navn  :multi-select? true :required? true]]]
+                      dokumenter
+                      [re-com/button :label "Send" :on-click #(re-frame/dispatch [:send-akt-data @selections])]]]))
 
 (defn main-panel []
   (let [edit-dok (re-frame/subscribe [:edit-dok])
