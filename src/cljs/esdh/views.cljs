@@ -82,13 +82,17 @@
        :gap "10px"
        :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Sager"]]
                                                                       [re-com/box :child [re-com/hyperlink :label "Hent" :on-click #(re-frame/dispatch [:find-sager])]]
-                                                                      [re-com/box :child [re-com/hyperlink :label "Tilføj" :on-click #(re-frame/dispatch [:add-sag true])]]]]
-                  [re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [re-com/input-text :model criteria-sag :on-change #(re-frame/dispatch [:search % :sag]) :status nil :change-on-blur? true :placeholder "Søg"]]]]
-                  [re-com/box :child [:table {:style {:height "760px" :display "block" :overflow-y "scroll"}}
-                                      (vec (cons :tbody
-                                                 (for [sag @sager]
-                                                   (do (prn "S" sag)
-                                                    [:tr [:td [re-com/hyperlink :label (first (:ice-id sag)) :on-click #(re-frame/dispatch [:sag-valgt sag])]]]))))]]]])))
+                                                                      [re-com/box :child [re-com/hyperlink :label "Tilføj" :on-click #(re-frame/dispatch [:add-sag true])]]
+                                                                      [re-com/box :child [re-com/input-text :model criteria-sag :on-change #(re-frame/dispatch [:search % :sag]) :status nil :change-on-blur? true :placeholder "Søg"]]]]
+                  [re-com/v-box :gap "10px"
+                   :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:b "Id"]] [re-com/box :child [:b "Myndighed"]] [re-com/box :child [:b "Oprettet"]] [re-com/box :child [:b "Frist"]]]]
+                              (for [sag @sager]
+                                [re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [re-com/hyperlink :label (first (:ice-id sag)) :on-click #(re-frame/dispatch [:sag-valgt sag])]] [re-com/box :child "Myndighed"] [re-com/box :child "Oprettet"] [re-com/box :child "Frist"]]])]]
+                  ;; [re-com/box :child [:table {:style {:height "100px" :display "block" :overflow-y "scroll"}}
+                  ;;                     (vec (cons :tbody
+                  ;;                                (for [sag @sager]
+                  ;;                                  [:tr [:td [re-com/hyperlink :label (first (:ice-id sag)) :on-click #(re-frame/dispatch [:sag-valgt sag])]]])))]]
+                  ]])))
 
 (defn akter []
   (let [sag (re-frame/subscribe [:sag])
@@ -97,9 +101,10 @@
     (fn []
       [re-com/v-box
        :gap "10px"
-       :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Akter"]][re-com/box :child [re-com/hyperlink :label "Tilføj" :on-click #(re-frame/dispatch [:add-akt true])]]]]
-                  [re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [re-com/input-text :model criteria-akt :on-change #(re-frame/dispatch [:search % :akt]) :status nil :change-on-blur? true :placeholder "Søg"]]]]
-                  [re-com/box :child [:table {:style {:height "760px" :display "block" :overflow-y "scroll"} :cellPadding "5px" :cellSpacing "5px"} [:tbody {:id "akter" :style {:display (if (nil? @sag) "none" "block")}} (for [akt @akter] [:tr [:td [re-com/hyperlink :label (str (first (:sagsbehandler akt)) "  " (first (:oprettet akt))) :on-click #(re-frame/dispatch [:akt-valgt akt])]]])]]]]])))
+       :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Akter"]]
+                                                                      [re-com/box :child [re-com/hyperlink :label "Tilføj" :on-click #(re-frame/dispatch [:add-akt true])]]
+                                                                      [re-com/box :child [re-com/input-text :model criteria-akt :on-change #(re-frame/dispatch [:search % :akt]) :status nil :change-on-blur? true :placeholder "Søg"]]]]
+                  [re-com/box :child [:table {:style {:height "100px" :display "block" :overflow-y "scroll"} :cellPadding "5px" :cellSpacing "5px"} [:tbody {:id "akter" :style {:display (if (nil? @sag) "none" "block")}} (for [akt @akter] [:tr [:td [re-com/hyperlink :label (str (first (:sagsbehandler akt)) "  " (first (:oprettet akt))) :on-click #(re-frame/dispatch [:akt-valgt akt])]]])]]]]])))
 
 (defn edit-dok-modal [dok]
   [re-com/v-box
@@ -163,23 +168,23 @@
         add-akt (re-frame/subscribe [:add-akt])
         send-akt (re-frame/subscribe [:send-akt])]
     (fn []
-      [re-com/h-box
+      [re-com/v-box
        :height "100%"
        :width "100%"
        :gap "10px"
        :margin "20px"
        :children [[re-com/box
                    :child [sager]
-                   :height "800px"
-                   :width "300px"
+                   :height "auto"
+                   :width "auto"
                    ]
                   [re-com/box
                    :child [akter]
-                   :height "800px"
-                   :width "270px"
+                   :height "auto"
+                   :width "auto"
                    ]
                   [re-com/v-box
-                   :height "800px"
+                   :height "auto"
                    :width "auto"
                    :gap "10px"
                    :children [[re-com/box
