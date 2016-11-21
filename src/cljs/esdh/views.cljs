@@ -85,14 +85,24 @@
                                                                       [re-com/box :child [re-com/hyperlink :label "Tilføj" :on-click #(re-frame/dispatch [:add-sag true])]]
                                                                       [re-com/box :child [re-com/input-text :model criteria-sag :on-change #(re-frame/dispatch [:search % :sag]) :status nil :change-on-blur? true :placeholder "Søg"]]]]
                   [re-com/v-box :gap "10px"
-                   :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:b "Id"]] [re-com/box :child [:b "Myndighed"]] [re-com/box :child [:b "Oprettet"]] [re-com/box :child [:b "Frist"]]]]
-                              (for [sag @sager]
-                                [re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [re-com/hyperlink :label (first (:ice-id sag)) :on-click #(re-frame/dispatch [:sag-valgt sag])]] [re-com/box :child "Myndighed"] [re-com/box :child "Oprettet"] [re-com/box :child "Frist"]]])]]
-                  ;; [re-com/box :child [:table {:style {:height "100px" :display "block" :overflow-y "scroll"}}
-                  ;;                     (vec (cons :tbody
-                  ;;                                (for [sag @sager]
-                  ;;                                  [:tr [:td [re-com/hyperlink :label (first (:ice-id sag)) :on-click #(re-frame/dispatch [:sag-valgt sag])]]])))]]
-                  ]])))
+                   :children [[re-com/h-box :align :center :width "100%"
+                               :children [[re-com/box :justify :center :min-width "25%" :max-width "25%" :child [:b "Id"]]
+                                          [re-com/box :justify :center :min-width "25%" :max-width "25%" :child [:b "Myndighed"]]
+                                          [re-com/box :justify :center :min-width "25%" :max-width "25%" :child [:b "Oprettet"]]
+                                          [re-com/box :justify :center :min-width "25%" :max-width "25%" :child [:b "Type"]]]]
+                              [re-com/scroller
+                               :v-scroll :auto
+                               :height   "100px"
+                               :child [re-com/v-box
+                                       :children [(for [sag @sager]
+                                                    [re-com/h-box :align :center :width "100%" :justify :between
+                                                     :children [[re-com/box :justify :start :min-width "25%" :max-width "25%" :child [re-com/hyperlink :label (first (:ice-id sag)) :on-click #(re-frame/dispatch [:sag-valgt sag])]]
+                                                                [re-com/box :justify :center :min-width "25%" :max-width "25%" :child (or (first (:myndighed sag)) "")
+                                                                 ]
+                                                                [re-com/box :justify :center :min-width "25%" :max-width "25%" :child (or (first (:oprettet sag)) "")
+                                                                 ]
+                                                                [re-com/box :justify :center :min-width "25%" :max-width "25%" :child (or (first (:type sag)) "")
+                                                                 ]]])]]]]]]])))
 
 (defn akter []
   (let [sag (re-frame/subscribe [:sag])
@@ -104,7 +114,25 @@
        :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Akter"]]
                                                                       [re-com/box :child [re-com/hyperlink :label "Tilføj" :on-click #(re-frame/dispatch [:add-akt true])]]
                                                                       [re-com/box :child [re-com/input-text :model criteria-akt :on-change #(re-frame/dispatch [:search % :akt]) :status nil :change-on-blur? true :placeholder "Søg"]]]]
-                  [re-com/box :child [:table {:style {:height "100px" :display "block" :overflow-y "scroll"} :cellPadding "5px" :cellSpacing "5px"} [:tbody {:id "akter" :style {:display (if (nil? @sag) "none" "block")}} (for [akt @akter] [:tr [:td [re-com/hyperlink :label (str (first (:sagsbehandler akt)) "  " (first (:oprettet akt))) :on-click #(re-frame/dispatch [:akt-valgt akt])]]])]]]]])))
+                  [re-com/v-box :gap "10px"
+                   :children [[re-com/h-box :align :center :width "100%"
+                               :children [[re-com/box :justify :center :min-width "25%" :max-width "25%" :child [:b "Id"]]
+                                          [re-com/box :justify :center :min-width "25%" :max-width "25%" :child [:b "Sagsbehandler"]]
+                                          [re-com/box :justify :center :min-width "25%" :max-width "25%" :child [:b "Oprettet"]]
+                                          [re-com/box :justify :center :min-width "25%" :max-width "25%" :child [:b "Type"]]]]
+                              [re-com/scroller
+                               :v-scroll :auto
+                               :height   "100px"
+                               :child [re-com/v-box
+                                       :children [(for [akt @akter]
+                                                    [re-com/h-box :align :center :width "100%" :justify :between
+                                                     :children [[re-com/box :justify :start :min-width "25%" :max-width "25%" :child [re-com/hyperlink :label (first (:ice-id akt)) :on-click #(re-frame/dispatch [:akt-valgt akt])]]
+                                                                [re-com/box :justify :center :min-width "25%" :max-width "25%" :child (or (first (:sagsbehandler akt)) "")
+                                                                 ]
+                                                                [re-com/box :justify :center :min-width "25%" :max-width "25%" :child (or (first (:oprettet akt)) "")
+                                                                 ]
+                                                                [re-com/box :justify :center :min-width "25%" :max-width "25%" :child (or (first (:type akt)) "")
+                                                                 ]]])]]]]]]])))
 
 (defn edit-dok-modal [dok]
   [re-com/v-box
