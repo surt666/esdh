@@ -21,10 +21,27 @@
    (re-frame/dispatch [:find-dokumenter (first (:ice-id akt))])
    (assoc db :akt akt)))
 
+;; (re-frame/reg-event-db
+;;  :dokument-valgt
+;;  (fn [db [_ dok]]
+;;    (assoc db :dok dok)))
+
+(defn handler [response]
+  (.log js/console (str response)))
+
+(defn error-handler [{:keys [status status-text]}]
+  (.log js/console (str "something bad happened: " status " " status-text)))
+
+
 (re-frame/reg-event-db
- :dokument-valgt
+ :aaben-dokument
  (fn [db [_ dok]]
-    (assoc db :dok dok)))
+   (prn "IID" (first (:ice-id dok)))
+   (GET (str "http://localhost:3000/dokument?dok-id=" (first (:ice-id dok)))
+        {:handler handler
+         :error-handler error-handler
+         :response-format {:content-type (first (:mime-type dok)) :type :arraybuffer} })
+   db))
 
 (re-frame/reg-event-db
  :save-notat

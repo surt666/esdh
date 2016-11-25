@@ -2,7 +2,8 @@
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :as re-frame]
             [re-com.core :as re-com]
-            [reagent.core :as reagent]))
+            [reagent.core :as reagent]
+            [ajax.core :refer [GET POST json-response-format raw-response-format]]))
 
 (defn sag []
   (let [sag (re-frame/subscribe [:sag])]
@@ -48,7 +49,7 @@
        :gap "10px"
        :children [[re-com/h-box :gap "10px" :align :center :children [[re-com/box :child [:h4 "Dokumenter"]]
                                                                       [re-com/box :child [re-com/hyperlink :label "Tilføj" :on-click #(re-frame/dispatch [:upload-dok true])]]]]
-                  [re-com/box :child [:table {:style {:height "160px" :display "block" :overflow-y "scroll"}} [:thead [:tr [:th "Dokument"] [:th "Titel"] [:th "Oprettet"]]] [:tbody (for [dok @dokumenter] [:tr [:td [re-com/hyperlink :label (str (first (:ice-id dok))) :on-click #(re-frame/dispatch [:dokument-valgt dok])]] [:td (str (first (:titel dok)))] [:td (str (first (:oprettet dok)))] [:td [re-com/hyperlink :label "edit" :on-click #(re-frame/dispatch [:edit-dok true])]]])]]]]])))
+                  [re-com/box :child [:table {:style {:height "160px" :display "block" :overflow-y "scroll"}} [:thead [:tr [:th "Dokument"] [:th "Titel"] [:th "Oprettet"]]] [:tbody (for [dok @dokumenter] [:tr [:td [re-com/hyperlink :label (str (first (:ice-id dok))) :on-click #(re-frame/dispatch [:aaben-dokument dok])]] [:td (str (first (:titel dok)))] [:td (str (first (:oprettet dok)))] [:td [re-com/hyperlink :label "edit" :on-click #(re-frame/dispatch [:edit-dok true])]]])]]]]])))
 
 (defn notat []
   (let [notat (re-frame/subscribe [:notat])]
@@ -101,8 +102,7 @@
                                                                  ]
                                                                 [re-com/box :justify :center :min-width "25%" :max-width "25%" :child (or (first (:oprettet sag)) "")
                                                                  ]
-                                                                [re-com/box :justify :center :min-width "25%" :max-width "25%" :child (or (first (:type sag)) "")
-                                                                 ]]])]]]]]]])))
+                                                                [re-com/box :justify :center :min-width "25%" :max-width "25%" :child (or (first (:type sag)) "")]]])]]]]]]])))
 
 (defn akter []
   (let [sag (re-frame/subscribe [:sag])
@@ -131,8 +131,7 @@
                                                                  ]
                                                                 [re-com/box :justify :center :min-width "25%" :max-width "25%" :child (or (first (:oprettet akt)) "")
                                                                  ]
-                                                                [re-com/box :justify :center :min-width "25%" :max-width "25%" :child (or (first (:type akt)) "")
-                                                                 ]]])]]]]]]])))
+                                                                [re-com/box :justify :center :min-width "25%" :max-width "25%" :child (or (first (:type akt)) "")]]])]]]]]]])))
 
 (defn edit-dok-modal [dok]
   [re-com/v-box
